@@ -5,7 +5,6 @@ type Value = boolean | number | string | ((x: Value) => Value);
 type Environment = Map<number, Value>;
 
 export const evaluate = (ast: AST, env: Environment = new Map()): Value => {
-  console.log(ast);
   switch (ast.kind) {
     case 'constant':
       return ast.v;
