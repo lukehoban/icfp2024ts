@@ -1,8 +1,9 @@
 import type { AST } from './ast';
 import { fromBase94, toBase94 } from './util';
 
-type Value = boolean | number | string | ((x: Value) => Value);
-type Environment = Map<number, Value>;
+type Value = boolean | number | string | ((x: Thunk) => Value);
+type Thunk = (() => Value) & { value?: Value};
+type Environment = Map<number, Thunk>;
 
 export const evaluate = (ast: AST, env: Environment = new Map()): Value => {
   switch (ast.kind) {
@@ -10,7 +11,9 @@ export const evaluate = (ast: AST, env: Environment = new Map()): Value => {
       return ast.v;
     case 'variable':
       if (!env.has(ast.v)) throw new Error(`Unbound variable: ${ast.v}`);
-      return env.get(ast.v)!;
+      const v = env.get(ast.v)!;
+      if (v.value === undefined) v.value = v();
+      return v.value;
     case 'unary':
       const x = evaluate(ast.x, env);
       switch (ast.op) {
@@ -25,7 +28,7 @@ export const evaluate = (ast: AST, env: Environment = new Map()): Value => {
       switch (ast.op) {
         case '$': {
           if (typeof left !== 'function') throw new Error('Application requires a function');
-          return left(evaluate(ast.y, env));
+          return left(() => evaluate(ast.y, env));
         }
         default: {
           const right = evaluate(ast.y, env);
@@ -50,6 +53,6 @@ export const evaluate = (ast: AST, env: Environment = new Map()): Value => {
     case 'ternary':
       return evaluate(evaluate(ast.cond, env) ? ast.then : ast.else, env);
     case 'lambda':
-      return (x: Value): Value => evaluate(ast.body, new Map(env).set(ast.v, x));
+      return (x: Thunk): Value => evaluate(ast.body, new Map(env).set(ast.v, x));
   }
 };
