@@ -14,5 +14,3 @@ export const toBase94 = (num: number): string => {
     const rem = num % 94;
     return (div ? toBase94(div) : "") + chars[rem];
 }
-
-  

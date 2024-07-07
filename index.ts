@@ -1,5 +1,5 @@
-import { parseICFP } from './parser';
-import { evaluate } from './eval';
+import { parseICFP } from './icfp/parser';
+import { evaluate } from './icfp/eval';
 
 const input = "B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK";
 
