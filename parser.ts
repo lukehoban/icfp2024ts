@@ -1,5 +1,5 @@
 import type { AST } from "./ast";
-import { fromBase94, decodeString } from "./util";
+import { base94, decodeString } from "./util";
 
 type Token = string;
 
@@ -15,7 +15,7 @@ const parse = (tokens: Token[]): [AST, Token[]] => {
   switch (h) {
     case 'T': return [{kind: 'constant', v: true}, ts];
     case 'F': return [{kind: 'constant', v: false}, ts];
-    case 'I': return [{kind: 'constant', v: fromBase94(r)}, ts];
+    case 'I': return [{kind: 'constant', v: base94(r)}, ts];
     case 'S': return [{kind: 'constant', v: decodeString(r)}, ts];
     case 'U': {
       const [x, rest] = parse(ts);
@@ -34,9 +34,9 @@ const parse = (tokens: Token[]): [AST, Token[]] => {
     }
     case 'L': {
       const [body, rest] = parse(ts);
-      return [{kind: 'lambda', v: fromBase94(r), body}, rest];
+      return [{kind: 'lambda', v: base94(r), body}, rest];
     }
-    case 'v': return [{kind: 'variable', v: fromBase94(r)}, ts];
+    case 'v': return [{kind: 'variable', v: base94(r)}, ts];
     default: throw new Error(`Unexpected token: ${t}`);
   }
 };
